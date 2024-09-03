@@ -1,0 +1,56 @@
+clear;
+clc;
+randn('state',100);
+rand('state',100);
+format long;
+tic;
+%alpha = 1.5;
+beta = -0.9;
+gam = 1;
+delta = 0;
+
+T = 500; dt=0.05; N =round(T/dt); tt = 0:dt:N*dt;
+h_p= 80;  
+r_m=0.3; 
+K=0.9;  
+m_A=0.15; 
+h_A=0.1;
+m_f=0.11;  
+h_f=0.64; 
+
+P= 2000; %??????rx!!!   % ?????? %
+
+a=4; b=6; r=6; FRI=7; h_c=0.57; h_SMI=1800; h_I=0.15;
+SMI=(h_SMI)^a/((h_SMI)^a+P^a); 
+f=@(x) (P/(h_p+P))*r_m*(x-x.^2/K)-m_A.*(h_A.*x./(x+h_A))-x.*(1/FRI).*((((h_c)^b./((h_c)^b+x.^b))*SMI).^r)./((h_I)^r+(((h_c)^b./((h_c)^b+x.^b)).*SMI).^r);
+K = 1;
+t = zeros(K,1);
+x0 = 0.9; 
+% control random Levy data
+S = zeros(K,N);
+for i = 1:K
+    for j = 1:N 
+        
+        S(i,j) = stblrnd(alpha(l),beta,gam,delta);
+       
+    end
+end
+B = randn(K,N);       %??????????
+c = 0;                %??????????????????????????,i.e.????????
+
+
+X = zeros(K,N+1);  %X(:,1) = 0.62685;     %??????
+     for m =1:K
+          for i = 1:N
+%              if   X(m,i) >= x0 
+                 X(m,i+1) = X(m,i) + f(X(m,i))*dt + g(X(m,i))*(dt)^(1/alpha(l))*S(m,i);
+                 
+%              else
+%                  c = c+1;
+%                  break;
+%              end
+          end
+          
+%           hold on;
+%            plot(tt, X(m,:),'b'); % all figure
+     end
