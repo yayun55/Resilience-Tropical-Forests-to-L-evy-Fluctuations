@@ -1,11 +1,7 @@
-% compute pdf of fpe corr to Levy noise with absorbing BC   
-% in a bounded, symmetric domain (-r,r);                     
-% central differencing for 2nd-order deriv                   
-% and using one-sided differencing near the boundaries;      
-% 3rd-order WENO for 1st-order deriv                        
-% 3rd-order TVD RK in time                                   
-
-% dXt=f(xt)dt+ddBt+epsdLt  with (0 0 va)
+% compute pdf of fpe corr to Levy noise with absorbing BC in a bounded, symmetric domain (-r,r); 
+%The code from Gao's paper, please refer it: Gao T, Duan J, Li X. 2016 Fokker-Planck equations for stochastic dynamical systems with sym-
+metric L´evy motions. Appl. Math. Comput. 278, 1–20.
+% We consider the SDE dXt=f(xt)dt+ddBt+epsdLt  with (0 0 va)
 
 %  function [U]=tgao7_Dwell_true(alpha,eps,s)
 clc;
@@ -15,7 +11,7 @@ alpha=1.5;
 eps=0.1; 
 a1 =0;  b1 =1; 
 T = 50; 
-rx = 0.83;   % ?????? %
+rx = 0.83;   
 
 format long
 
@@ -34,7 +30,7 @@ h_A=0.1;
 m_f=0.11;  
 h_f=0.64; 
 
-P= 2000; %??????rx!!!   % ?????? %
+P= 2000; 
 
 a=4; b=6; r=6; FRI=7; h_c=0.57; h_SMI=1800; h_I=0.15;
 SMI=(h_SMI)^a/((h_SMI)^a+P^a); 
@@ -43,23 +39,20 @@ f=@(x) ((P/(h_p+P))*r_m*(x-x.^2/K)-m_A.*(h_A.*x./(x+h_A))-x.*(1/FRI).*((((h_c)^b
 rr=1;             %right
 rl=1;             %left
 h=0.01;          
-J=rr/h;             %right  ??????????????????
-L=rl/h;             %left   ??????????????????
+J=rr/h;             %right  
+L=rl/h;             %left   
 dt = 0.5*h^2;
 dtdx = dt/h;
 nft=round(T/dt);
  XX = a1:(b1-a1)/2*h :b1;  
-fpmax=max(f(XX)); % maximum of f in [a, b]     %% ???????????????abs(f(b1))??? 
-%fpmax=abs(f(a1));
+fpmax=max(f(XX)); % maximum of f in [a, b]      
 
-     %%% ????????????????????????
-
-Jt=L+J-1;     %Jt=total number of unknowns    % Jt??????????????? ???-1?????????????????????0??????????????????????????????????????????-1
+ Jt=L+J-1;     
 x=-(rl+rr):h:(rl+rr);    %  ???x=(-2,2)  ,(-1,1)?????????  X
 C=-zeta(alpha-1)*h^(2-alpha);          % correction term u''(x)   % Ch????????????
 cons=alpha*gamma((1+alpha)/2)/(2^(1-alpha)*sqrt(pi)*gamma(1-alpha/2));   % ??????C??
 % coeff for the diffusion and the correction term
-Chh=( d/2 + cons*C*eps^(alpha)*(2/(b1-a1))^alpha )/h^2;    %% Ch/h^2(????????????) ?????????eps = eps^(alpha)*(2/(b1-a1))^alpha???
+Chh=( d/2 + cons*C*eps^(alpha)*(2/(b1-a1))^alpha )/h^2;    
 c1=eps^(alpha)*(2/(b1-a1))^alpha*cons/alpha;   %% ??????
 c2=eps^(alpha)*(2/(b1-a1))^alpha*cons*h;      %%  ??????
 
@@ -69,11 +62,6 @@ c=zeros(Jt,1);
 
 %  nonintegral part
 
-% % % coefficient of U_j . half absoring half is infinit
-%  b(2:Jt-1) = (-2*Chh - c1*(1./(x(J+3:2*J+L-1)+rl).^alpha(m)))';
-% % % one-sided diff near boundaries
-%  b(1)  = 2*Chh - c1*(1/(rl+x(J+2))^alpha(m)); 
-% % b(Jt) = 2*Chh - c1*(1/(rl+x(2*J+L))^alpha(m)); % one-sided diff
 
 % %nonintegral part/absorbing  Ch(P_(j-1)-2P_(j)+P_(j+1))/h^2; Chh=Ch/h^2;
 % coefficient of U_j
@@ -116,19 +104,10 @@ for j=-L+1:J-1
   B(L+j,:)=[1./abs(x(J+2-j:L+J)).^(1+alpha)  0  1./abs(x(L+J+2:2*J+L-j)).^(1+alpha)];     % ????????????0
 end
 
-
-
-%A = diag(ones(Jt,1)) + dt*(A+c2*B); % the iterative matrix for each time-step
-% ????????? P=1000/2000??? forest??????????????? 0.7/0.85      % ?????? %
 X=-rl:h:rr;   %?????????(-1,1)  X
 
-%UU=sqrt(pi)*(r^2-X.^2).^(alpha/2)/(2^alpha*gamma(1+alpha/2)*gamma(1/2+alpha/2)); 
+
 UU=sqrt(40/pi)*exp(-(XX - rx).^2 *40);  % gaussian'
-% UU = 0.01./(pi*(0.01^2+X.^2));
-%UU = zeros(2*J+1,1)';
-%lo = (x0+1)/h+1;
-%UU(lo) = 1/(2*h);    UU(lo+1) = 1/(2*h);  UU(lo-1) = 1/(2*h);
-%UU=ones(size(X))./(rr+rl);
 U=UU(2:end-1)';
 Un=U; U1=U; U2=U;
 %U=UU(2:end-1);
@@ -163,32 +142,17 @@ for nt=1:nft-1
     data(3:nu+2) = (f(XX(2:end-1)) - fpmax)'.*U2/2;
     fx2 = derWENOr2_plus(data,h);
     Un = Un - (2*dtdx/3)*(fx1+fx2);   
-    
-%     if mod(nt,100)==0
-%        plot(X,[0; U; 0])    
-%     end
-         %pause
             
      U=Un;
      %t=nt*dt;
      
-     
-%      [max1, loc1]= max(U);
-%      mp = loc1;
-%      MP(nt) = XX(mp+1);
-
-
-     % F(nt) = getframe;
-      XU(:,nt) = U;     % ????????????
+      XU(:,nt) = U;     
          
 end
-%save('plotdiffT_uniform','P1','P2','P3','P4')
-%title(['final time t= ', num2str(t)])
-% Ux = U; 
 t = dt : dt : (nft-1)*dt;
 
 
- plot(XX',[0;XU(:,end)／sum(XU(:,end)*(b1-a1)/2*h);0])    %%% ????????????(a1,b1) XX ??????????????????
+ plot(XX',[0;XU(:,end)／sum(XU(:,end)*(b1-a1)/2*h);0])   
 xlabel('Tree cover fraction');  ylabel('Density');
 
 
