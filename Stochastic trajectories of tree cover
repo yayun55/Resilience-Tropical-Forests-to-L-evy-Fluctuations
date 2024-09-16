@@ -1,3 +1,13 @@
+% Stochastic Levy random variables are generated
+%References:
+% [1] J.M. Chambers, C.L. Mallows and B.W. Stuck (1976) 
+%     "A Method for Simulating Stable Random Variables"  
+%     JASA, Vol. 71, No. 354. pages 340-344  
+%
+% [2] Aleksander Weron and Rafal Weron (1995)
+%     "Computer Simulation of Levy alpha-Stable Variables and Processes" 
+%     Lec. Notes in Physics, 457, pages 379-392
+
 clear;
 clc;
 randn('state',100);
